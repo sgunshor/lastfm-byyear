@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <title>Top artist uniqueness</title>
+</head>
+<body>
+    <h1>Top artist uniqueness</h1>
+    <p>Enter your Last.fm username to see how many of your friends share your top artists!</p>
+    <input id="username" type="text" placeholder="Enter Last.fm username">
+    <select id="artist-count-select" aria-label="Number of artists to fetch">
+        <option value="10">10</option>
+        <option value="25" selected>25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+    </select>
+    <button id="fetch-albums">Fetch Top Artists</button>
+
+    <div style="margin-top:12px;">
+        <progress id="progress" value="0" max="100" style="width:100%; display:block; height:16px;"></progress>
+        <div id="progress-text" style="font-size:0.9em; margin-top:6px; color:#333;"></div>
+    </div>
+
+    <div id="albums-container"></div>
+    <script src="script.js"></script>
+</body>
+</html>

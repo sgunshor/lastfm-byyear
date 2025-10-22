@@ -1,29 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-    <title>Top artist uniqueness</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>lokiimp</title>
+  <style>
+    :root{--bg:#0b0d0f;--muted:#9aa0a6;--accent:#8ab4f8}
+    html,body{height:100%;margin:0}
+    body{background:var(--bg);color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;display:flex;align-items:center;justify-content:center}
+    .wrap{max-width:760px;padding:24px;text-align:center}
+    h1{font-size:64px;margin:0 0 12px;font-weight:700;letter-spacing:-2px;text-transform:lowercase}
+    p.bio{color:var(--muted);font-size:16px;margin:8px 0 20px;text-transform:lowercase}
+    .projects{margin-top:28px;text-align:left}
+    .projects h2{font-size:18px;margin:0 0 8px;color:var(--muted);text-transform:lowercase}
+    .projects ul{list-style:none;padding:0;margin:0}
+    .projects li{margin:6px 0}
+    a{color:var(--accent);text-decoration:none;text-transform:lowercase}
+    a:hover{text-decoration:underline}
+    footer{margin-top:40px;color:var(--muted);font-size:13px;text-transform:lowercase}
+  </style>
 </head>
 <body>
-    <h1>Top artist uniqueness</h1>
-    <p>Enter your Last.fm username to see how many of your friends share your top artists!</p>
-    <input id="username" type="text" placeholder="Enter Last.fm username">
-    <select id="artist-count-select" aria-label="Number of artists to fetch">
-        <option value="10">10</option>
-        <option value="25" selected>25</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-    </select>
-    <button id="fetch-albums">Fetch Top Artists</button>
+  <div class="wrap">
+    <h1>lokiimp</h1>
+    <p class="bio">hi — i'm lokiimp. i like music, movies, lists, computers, and friends. this is a tiny hub for a few projects and profiles.</p>
 
-    <div style="margin-top:12px;">
-        <progress id="progress" value="0" max="100" style="width:100%; display:block; height:16px;"></progress>
-        <div id="progress-text" style="font-size:0.9em; margin-top:6px; color:#333;"></div>
-    </div>
+    <section class="projects">
+      <h2>projects</h2>
+      <ul>
+        <li><a href="lastfmfriends.html">lastfm friends / top-artist uniqueness</a></li>
+      </ul>
 
-    <div id="albums-container"></div>
-    <script src="script.js"></script>
+      <h2 style="margin-top:14px">profiles</h2>
+      <ul>
+        <li><a href="https://letterboxd.com/lokiimp/" target="_blank" rel="noopener">letterboxd</a></li>
+        <li><a href="https://rateyourmusic.com/~lokiimp" target="_blank" rel="noopener">rateyourmusic</a></li>
+      </ul>
+    </section>
+
+    <footer>all text stylized in lowercase · made with simple javascript</footer>
+  </div>
 </body>
 </html>
+
