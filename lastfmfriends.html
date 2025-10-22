@@ -9,6 +9,7 @@
         :root{--bg:#000;--fg:#e6eef8;--muted:#9aa0a6;--accent:#8ab4f8}
         html,body{height:100%;margin:0}
         body{background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;padding:20px}
+        .container{max-width:880px;margin:48px auto;padding:20px}
         h1{margin-top:0;color:var(--fg);text-transform:lowercase}
         p{color:var(--muted);text-transform:lowercase}
         input[type="text"], select, button{font-size:14px;padding:6px 8px;border-radius:4px;border:1px solid #222;background:#0f1112;color:var(--fg)}
@@ -17,26 +18,36 @@
         progress{background:#222}
         #progress-text{color:var(--muted)}
         a{color:var(--accent)}
+        header{display:flex;justify-content:space-between;align-items:center}
     </style>
 </head>
 <body>
-    <h1>Top artist uniqueness</h1>
-    <p>Enter your Last.fm username to see how many of your friends share your top artists!</p>
-    <input id="username" type="text" placeholder="Enter Last.fm username">
-    <select id="artist-count-select" aria-label="Number of artists to fetch">
-        <option value="10">10</option>
-        <option value="25">25</option>
-        <option value="50">50</option>
-        <option value="100" selected>100</option>
-    </select>
-    <button id="fetch-albums">Fetch Top Artists</button>
+    <div class="container">
+      <header>
+        <h1>top artist uniqueness</h1>
+        <a href="index.html" style="color:#8ab4f8;text-decoration:none;text-transform:lowercase">home</a>
+      </header>
 
-    <div style="margin-top:12px;">
-        <progress id="progress" value="0" max="100" style="width:100%; display:block; height:16px;"></progress>
-        <div id="progress-text" style="font-size:0.9em; margin-top:6px; color:#333;"></div>
+      <p>Enter your Last.fm username to see how many of your friends share your top artists!</p>
+
+      <div style="display:flex;gap:12px;align-items:center">
+        <input id="username" type="text" placeholder="Enter Last.fm username" />
+        <select id="artist-count-select" aria-label="Number of artists to fetch">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100" selected>100</option>
+        </select>
+        <button id="fetch-albums">Fetch Top Artists</button>
+      </div>
+
+      <div style="margin-top:12px;">
+          <progress id="progress" value="0" max="100" style="width:100%; display:block; height:16px;"></progress>
+          <div id="progress-text" style="font-size:0.9em; margin-top:6px; color:#9aa0a6;"></div>
+      </div>
+
+      <div id="albums-container"></div>
     </div>
-
-    <div id="albums-container"></div>
     <script src="script.js"></script>
 </body>
 </html>
