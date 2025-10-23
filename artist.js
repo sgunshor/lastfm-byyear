@@ -40,7 +40,11 @@ document.getElementById('lookup').addEventListener('click', async () => {
     progress.value = 0; progressText.textContent = 'fetching friends...';
     const fr = await get_friends(username, 500);
     const friends = (fr && fr.friends && fr.friends.user) || [];
-    const friendNames = friends.map(f => f.name).filter(n => n && n.toLowerCase() !== username.toLowerCase());
+  const friendNames = friends.map(f => f.name).filter(n => n && n.toLowerCase() !== username.toLowerCase());
+  // include the user's own username in the list so we fetch their playcount as well
+  const userAlreadyIncluded = friendNames.some(n => n.toLowerCase() === username.toLowerCase());
+  if (!userAlreadyIncluded) friendNames.unshift(username);
+    
 
     if (friendNames.length === 0) {
       progressText.textContent = 'no friends found';
