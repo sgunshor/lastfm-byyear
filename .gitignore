@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Environment files (contains secrets)
+.env
+
+# Development/test files not needed for production
+appwrite.html
+mbid-test.html
+mbid-test.js
+albums.html
+albums.js
+
+# Appwrite functions (deployed separately)
+functions/
+
+# Editor/IDE
+.vscode/
+
+# Build artifacts
+*.log
+
+# Misc files from GP-sgunshor not needed (keep libs/, main.js)
+GP-sgunshor/index.html
+GP-sgunshor/styles.css
+GP-sgunshor/README.md
+

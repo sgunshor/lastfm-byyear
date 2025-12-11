@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GP Drift Rally — lokiimp</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, system-ui, sans-serif;
+      background: radial-gradient(circle at 20% 20%, #1b1f2a, #0b0d13 60%);
+      color: #f0f4ff;
+    }
+
+    a, button { font-family: inherit; }
+    a { color: #9cd7ff; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: #111827;
+      border-bottom: 1px solid #1f2937;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      flex-wrap: wrap;
+    }
+
+    .top-bar .home-link {
+      font-weight: 600;
+      font-size: 14px;
+      color: #8ab4f8;
+      margin-right: auto;
+    }
+
+    .id-block { font-weight: 700; letter-spacing: 0.5px; }
+    .mode-switcher label { margin-right: 0.75rem; cursor: pointer; }
+
+    main { padding: 1rem; display: grid; gap: 1rem; }
+
+    .hud {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .stat {
+      padding: 0.75rem 0.9rem;
+      border: 1px solid #1f2a3d;
+      background: #111827;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+    }
+
+    .stat.timer-stat {
+      background: linear-gradient(135deg, #1a2233 0%, #111827 100%);
+      border-color: #3b82f6;
+    }
+
+    .stat.timer-stat span {
+      font-family: "Consolas", "Monaco", monospace;
+      font-weight: 600;
+      color: #60a5fa;
+    }
+
+    .canvas-wrap {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #1f2a3d;
+      background: #0b0d13;
+      min-height: 540px;
+    }
+
+    #three-container { width: 100%; height: 100%; min-height: 540px; }
+
+    .touch-controls {
+      position: absolute;
+      inset: auto 0 0 0;
+      display: flex;
+      justify-content: space-between;
+      padding: 0.6rem 0.8rem;
+      pointer-events: none;
+    }
+
+    .touch-controls button {
+      pointer-events: auto;
+      width: 64px;
+      height: 48px;
+      border-radius: 10px;
+      border: 1px solid #1f2a3d;
+      background: rgba(31,45,76,0.75);
+      color: #e8f0ff;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+
+    .touch-controls .row { display: flex; gap: 0.35rem; }
+
+    .touch-left { display: grid; gap: 0.35rem; align-items: center; }
+    .touch-right { display: flex; align-items: flex-end; }
+    .touch-right .drift { height: 72px; width: 84px; font-size: 1rem; }
+
+    .touch-controls.hidden { opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+
+    .instructions {
+      background: #0f172a;
+      border: 1px solid #1f2a3d;
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+    }
+
+    .instructions h2 { margin: 0 0 0.6rem 0; }
+    .instructions ul { margin: 0; padding-left: 1.2rem; line-height: 1.5; }
+
+    button.ghost {
+      background: transparent;
+      color: #cde0ff;
+      border: 1px solid #1f2a3d;
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button.ghost:hover {
+      background: rgba(59, 130, 246, 0.1);
+      border-color: #3b82f6;
+    }
+
+    @media (max-width: 800px) {
+      .top-bar { flex-wrap: wrap; }
+      .canvas-wrap { min-height: 420px; }
+      #three-container { min-height: 420px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="top-bar">
+    <a href="index.html" class="home-link">← lokiimp</a>
+    <div class="id-block">GP Drift Rally</div>
+    <div class="mode-switcher">
+      <label><input type="radio" name="mode" value="prototype" checked> Prototype</label>
+      <label><input type="radio" name="mode" value="full"> Full</label>
+    </div>
+    <button id="resetBtn" class="ghost">Reset Run</button>
+  </header>
+
+  <main>
+    <section class="hud">
+      <div class="stat">Score: <span id="score">0</span></div>
+      <div class="stat">Laps: <span id="lapCount">0</span></div>
+      <div class="stat">Checkpoints: <span id="checkpoint">0/5</span></div>
+      <div class="stat timer-stat">⏱️ Lap: <span id="lapTimer">0:00.00</span></div>
+      <div class="stat timer-stat">Last: <span id="lastLap">--:--.--</span></div>
+      <div class="stat timer-stat">Best: <span id="bestLap">--:--.--</span></div>
+      <div class="stat">Speed: <span id="speed">0</span> m/s</div>
+      <div class="stat">Drift: <span id="drift">0</span> pts</div>
+      <div class="stat">Track Status: <span id="trackState">On track</span></div>
+      <div class="stat">Ghost Lap: <span id="ghostLap">0%</span></div>
+    </section>
+
+    <section class="canvas-wrap">
+      <div id="three-container"></div>
+      <div class="touch-controls" id="touchControls">
+        <div class="touch-left">
+          <button data-key="KeyW">W</button>
+          <div class="row">
+            <button data-key="KeyA">A</button>
+            <button data-key="KeyS">S</button>
+            <button data-key="KeyD">D</button>
+          </div>
+        </div>
+        <div class="touch-right">
+          <button data-key="Space" class="drift">Drift</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="instructions">
+      <h2>How to play</h2>
+      <ul>
+        <li><strong>W/S:</strong> accelerate/brake. <strong>A/D:</strong> steer. <strong>Space:</strong> hold to drift for bonus points.</li>
+        <li>Stay on the asphalt ring to earn steady points. Off-track slows scoring and risks obstacles.</li>
+        <li>Hit obstacles and you'll lose speed and points. Drift cleanly to build combos.</li>
+        <li>Toggle <strong>Prototype</strong> vs <strong>Full</strong> mode: primitives only vs textured + loaded assets.</li>
+        <li>Mobile: use the on-screen buttons. Mouse/touch drag on the canvas pans the camera.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./GP-sgunshor/libs/three/build/three.module.js",
+        "three/examples/jsm/": "./GP-sgunshor/libs/three/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="./GP-sgunshor/main.js"></script>
+</body>
+</html>
