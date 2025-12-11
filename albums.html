@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Last.fm Albums + MusicBrainz (with Appwrite cache)</title>
+    <style>
+      body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:#0b0b0c;color:#e8e8ea;padding:24px}
+      .card{background:#0f0f10;border-radius:8px;padding:18px;max-width:980px;margin:0 auto;border:1px solid rgba(255,255,255,0.03)}
+      input,select{padding:8px;border-radius:6px;border:1px solid #222;background:#0b0b0c;color:#eaeaea}
+      button{background:#fd366e;color:white;border:0;padding:8px 12px;border-radius:6px;cursor:pointer}
+      table{width:100%;border-collapse:collapse;margin-top:12px}
+      th,td{padding:8px;border-bottom:1px solid #111;text-align:left;font-size:13px}
+      .meta{font-size:13px;color:#bdbdc1;margin-bottom:8px}
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>Top 250 albums (Last.fm) — release dates via MusicBrainz (cached in Appwrite)</h1>
+      <p class="meta">Enter a Last.fm username and click Fetch. The page will check Appwrite for cached release dates (by MBID) and call MusicBrainz for missing MBIDs (1 request/sec) and save results back to Appwrite.</p>
+
+      <div style="display:flex;gap:8px;align-items:center">
+        <label for="lf-username">Last.fm username</label>
+        <input id="lf-username" placeholder="username" />
+        <label for="limit">Count</label>
+        <select id="limit"><option>50</option><option>100</option><option selected>250</option></select>
+        <button id="fetch">Fetch top albums</button>
+      </div>
+
+      <div style="margin-top:10px">
+        <progress id="progress" value="0" max="100" style="width:100%"></progress>
+        <div id="status" style="margin-top:6px;font-size:13px;color:#bdbdc1">Idle</div>
+      </div>
+
+      <table aria-live="polite">
+        <thead>
+          <tr><th>#</th><th>Album</th><th>MBID</th><th>Release date</th><th>Plays</th></tr>
+        </thead>
+        <tbody id="albums-body"></tbody>
+      </table>
+    </main>
+
+    <!-- reuse existing Last.fm helper functions in script.js (global functions) -->
+    <script src="./script.js"></script>
+    <script type="module" src="./albums.js"></script>
+  </body>
+</html>

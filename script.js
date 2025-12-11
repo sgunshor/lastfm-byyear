@@ -89,9 +89,15 @@ function display_albums(albums) {
 }
 
 
-document.getElementById('fetch-albums').addEventListener('click', () => {
-    computeSharedArtists();
-});
+const fetchAlbumsBtn = document.getElementById('fetch-albums');
+if (fetchAlbumsBtn) {
+    fetchAlbumsBtn.addEventListener('click', () => {
+        computeSharedArtists();
+    });
+} else {
+    // Page may not include the element (e.g., albums.html uses a different button id).
+    // This avoids uncaught TypeError when script.js is loaded on pages without that button.
+}
 
 async function computeSharedArtists() {
     const username = document.getElementById('username').value.trim();

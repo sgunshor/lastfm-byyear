@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Appwrite test</title>
+    <style>
+      body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:#0b0b0c;color:#e8e8ea;padding:32px}
+      .card{background:#0f0f10;border-radius:8px;padding:18px;max-width:820px;margin:0 auto;border:1px solid rgba(255,255,255,0.03)}
+      button{background:#fd366e;color:white;border:0;padding:8px 12px;border-radius:6px;cursor:pointer}
+      pre{background:#070707;color:#cfcfd2;padding:12px;border-radius:6px;overflow:auto}
+      .meta{font-size:13px;color:#bdbdc1;margin-bottom:8px}
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>Appwrite connectivity test</h1>
+      <p class="meta">This page imports <code>lib/appwrite.js</code> and uses your Vite env values. It is not linked from your site — open directly to test.</p>
+
+      <div>
+        <div><strong>Endpoint:</strong> <span id="endpoint">(loading)</span></div>
+        <div><strong>Project ID:</strong> <span id="project">(loading)</span></div>
+      </div>
+
+      <p style="margin-top:12px">
+        <button id="ping">Send ping</button>
+        <button id="clear" style="margin-left:8px;background:#444">Clear logs</button>
+      </p>
+
+      <h3>Logs</h3>
+      <pre id="logs">No logs yet.</pre>
+    </main>
+
+    <script type="module">
+      import { client } from './lib/appwrite.js';
+
+      const endpointSpan = document.getElementById('endpoint');
+      const projectSpan = document.getElementById('project');
+      const logsEl = document.getElementById('logs');
+      const pingBtn = document.getElementById('ping');
+      const clearBtn = document.getElementById('clear');
+
+      // show the env values the client used (if present at build time)
+      try {
+        endpointSpan.textContent = import.meta.env.VITE_APPWRITE_ENDPOINT || '(not set)';
+        projectSpan.textContent = import.meta.env.VITE_APPWRITE_PROJECT_ID || '(not set)';
+      } catch (e) {
+        // import.meta may not be available if opened as file:// — that's expected
+        endpointSpan.textContent = '(import.meta.env not available from file://). Run via Vite or open built site.';
+        projectSpan.textContent = '(import.meta.env not available)';
+      }
+
+      function appendLog(obj){
+        const now = new Date().toLocaleString();
+        const text = `[${now}] ${obj}\n`;
+        if(logsEl.textContent === 'No logs yet.') logsEl.textContent = '';
+        logsEl.textContent = text + logsEl.textContent;
+      }
+
+      pingBtn.addEventListener('click', async () => {
+        pingBtn.disabled = true;
+        appendLog('Sending ping...');
+        try{
+          const res = await client.ping();
+          appendLog('Ping success: ' + JSON.stringify(res));
+        }catch(err){
+          appendLog('Ping error: ' + (err && err.message ? err.message : String(err)));
+        }finally{
+          pingBtn.disabled = false;
+        }
+      });
+
+      clearBtn.addEventListener('click', () => logsEl.textContent = 'No logs yet.');
+    </script>
+  </body>
+</html>

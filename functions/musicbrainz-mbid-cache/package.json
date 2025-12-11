@@ -1,0 +1,9 @@
+{
+  "name": "musicbrainz-mbid-cache",
+  "version": "1.0.0",
+  "description": "Appwrite Function to fetch MusicBrainz release dates and cache them in the database (document id = mbid)",
+  "main": "src/main.js",
+  "dependencies": {
+    "node-appwrite": "^8.1.0"
+  }
+}
