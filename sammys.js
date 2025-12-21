@@ -383,6 +383,16 @@ function renderCategories(list) {
   categoriesContainer.appendChild(fragment);
 }
 
+// Normalize asset paths so pages served from subfolders can still find
+// images stored at the repo root. If the path is already absolute
+// (starts with '/' or 'http'), return it unchanged; otherwise prefix
+// with '../' so `sammys/index.html` can resolve `images/...` correctly.
+function resolveAsset(path) {
+  if (!path) return path;
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('/')) return path;
+  return '../' + path;
+}
+
 function createNomineeCard(nominee, winnerName, options = {}) {
   const article = document.createElement('article');
   article.className = 'nominee';
@@ -466,7 +476,7 @@ function createNomineeCard(nominee, winnerName, options = {}) {
     } else if (hasImage) {
       // PERFORMANCE: Switch from background-image to <img> for Lazy Loading
       const img = document.createElement('img');
-      img.src = nominee.image;
+      img.src = resolveAsset(nominee.image);
       img.loading = "lazy"; // Huge performance win
       img.alt = nominee.name;
       img.style.width = '100%';
