@@ -1,9 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VWQF2LTCY7"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-VWQF2LTCY7');
+  </script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sammys 2025 · lokiimp</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon_io/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon_io/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/favicon_io/site.webmanifest">
+
+  <title>Sammys 2025</title>
   <style>
     :root {
       --bg:#0b0d0f;
@@ -105,14 +119,17 @@
   </style>
 </head>
 <body>
-  <header>
-    <h1>Sammys 2025</h1>
+  <header style="display:flex;align-items:center;gap:12px;">
+    <h1 style="margin:0">Sammys 2025</h1>
+    <div style="margin-left:auto">
+      <a href="../" style="color:var(--accent);text-decoration:none;text-transform:lowercase">home</a>
+    </div>
   </header>
 
   <main>
     <section class="categories" id="categories"></section>
   </main>
 
-  <script src="sammys.js"></script>
+  <script src="../sammys.js"></script>
 </body>
 </html>

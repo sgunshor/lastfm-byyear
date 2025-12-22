@@ -1,9 +1,23 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VWQF2LTCY7"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-VWQF2LTCY7');
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GP Drift Rally — lokiimp</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon_io/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon_io/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/favicon_io/site.webmanifest">
+
+  <title>GP Drift Rally</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -141,7 +155,7 @@
 </head>
 <body>
   <header class="top-bar">
-    <a href="index.html" class="home-link">← lokiimp</a>
+    <a href="../" class="home-link">← home</a>
     <div class="id-block">GP Drift Rally</div>
     <div class="mode-switcher">
       <label><input type="radio" name="mode" value="prototype" checked> Prototype</label>
@@ -196,11 +210,11 @@
   <script type="importmap">
     {
       "imports": {
-        "three": "./GP-sgunshor/libs/three/build/three.module.js",
-        "three/examples/jsm/": "./GP-sgunshor/libs/three/examples/jsm/"
+        "three": "../GP-sgunshor/libs/three/build/three.module.js",
+        "three/examples/jsm/": "../GP-sgunshor/libs/three/examples/jsm/"
       }
     }
   </script>
-  <script type="module" src="./GP-sgunshor/main.js"></script>
+  <script type="module" src="../GP-sgunshor/main.js"></script>
 </body>
 </html>
