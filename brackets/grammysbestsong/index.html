@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>grammy bracket | lokiimp</title>
+    <style>
+        :root { --bg: #0b0d0f; --muted: #9aa0a6; --accent: #8ab4f8; --border: #202124; --hover: #17191cd1; }
+        html, body { height: 100%; margin: 0; }
+        body { background: var(--bg); color: #fff; font-family: system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; overflow: hidden; }
+        
+        .nav { width: 100%; padding: 20px 24px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); box-sizing: border-box; align-items: center; }
+        a { color: var(--accent); text-decoration: none; text-transform: lowercase; }
+        a:hover { text-decoration: underline; }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
+
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+
+        .nav-controls { display: flex; gap: 12px; align-items: center; }
+        select, input, button { background: var(--bg); color: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-family: system-ui; outline: none; text-transform: lowercase; font-size: 13px; }
+        select:focus, input:focus { border-color: var(--muted); }
+        button { cursor: pointer; transition: background 0.2s; }
+        button:hover { background: var(--hover); }
+        .btn-primary { background: #fff; color: #000; font-weight: bold; border: none; padding: 10px 16px; margin-top: 12px; }
+        .btn-primary:hover { background: #ccc; }
+        .btn-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: none; }
+        .btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
+
+        .app-container { flex: 1; display: flex; width: 100%; overflow: hidden; }
+        
+        .setup-view { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+        .setup-card { background: var(--bg); border: 1px solid var(--border); padding: 32px; border-radius: 12px; max-width: 400px; width: 100%; text-align: left; }
+        h1 { font-size: 32px; margin: 0 0 8px; font-weight: 700; text-transform: lowercase; letter-spacing: -1px; }
+        p.desc { color: var(--muted); font-size: 14px; margin: 0 0 24px; text-transform: lowercase; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; text-transform: lowercase; }
+        select, input { width: 100%; box-sizing: border-box; }
+
+        .matchup-view { flex: 1; flex-direction: column; align-items: center; justify-content: center; padding: 24px; position: relative; display: flex; overflow-y: auto; }
+        .round-info { text-align: center; color: var(--muted); font-size: 12px; letter-spacing: 1px; text-transform: lowercase; margin-bottom: 32px; }
+        .matchup-cards { display: flex; width: 100%; max-width: 900px; gap: 24px; justify-content: space-between; align-items: stretch; }
+        .match-card { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 24px; cursor: pointer; transition: all 0.2s; position: relative; }
+        .match-card:hover { border-color: var(--muted); transform: translateY(-2px); }
+        .seed-badge { position: absolute; top: 16px; right: 16px; font-size: 11px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px; color: var(--muted); text-transform: lowercase; }
+        .match-card h3 { margin: 24px 0 4px; font-size: 24px; text-transform: lowercase; }
+        .match-card p { margin: 0 0 20px; color: var(--muted); text-transform: lowercase; font-size: 14px; }
+        .embed-area { width: 100%; aspect-ratio: 16/9; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 13px; margin-bottom: 16px; overflow:hidden;}
+        .embed-area iframe { width: 100%; height: 100%; border: none; }
+        .vs-badge { display: flex; align-items: center; justify-content: center; min-width: 48px; min-height: 48px; background: var(--bg); border: 1px solid var(--border); border-radius: 50%; color: var(--muted); font-weight: bold; font-size: 12px; text-transform: lowercase; }
+
+        .btn-info { background: transparent; color: var(--accent); border: 1px solid var(--border); padding: 4px 10px; font-size: 11px; margin-bottom: 12px; }
+        .btn-info:hover { background: rgba(255,255,255,0.05); }
+        .info-panel { background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 6px; padding: 12px; font-size: 12px; color: var(--muted); margin-bottom: 16px; text-align: left; }
+        .info-panel strong { color: #fff; }
+        
+        .sidebar { width: 300px; border-left: 1px solid var(--border); display: flex; flex-direction: column; background: rgba(255,255,255,0.01); }
+        @media (max-width: 900px) { .sidebar { display: none !important; } .matchup-cards { flex-direction: column; } .vs-badge { margin: 0 auto; min-height: 32px; } }
+        .sidebar-header { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: bold; text-transform: lowercase; }
+        .sidebar-content { flex: 1; overflow-y: auto; padding: 20px; }
+        .tree-node { font-size: 12px; padding: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--muted); margin-bottom: 8px; text-transform: lowercase; transition: opacity 0.2s;}
+        .tree-node.loser { text-decoration: line-through; opacity: 0.3; }
+        .tree-node.winner { border-color: var(--accent); color: var(--accent);}
+        .tree-line { width: 1px; height: 16px; background: var(--border); margin-left: 16px; margin-bottom: 8px; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="nav">
+        <a href="/brackets/">← brackets</a>
+        <div class="nav-controls">
+            <select id="embed-pref">
+                <option value="none">no audio embeds</option>
+                <option value="spotify">spotify embeds</option>
+                <option value="youtube">youtube embeds</option>
+            </select>
+            <button id="reset-btn" class="btn-danger">reset data</button>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <main id="setup-view" class="setup-view">
+            <div class="setup-card">
+                <h1>song of the year</h1>
+                <p class="desc">generate a tournament bracket of up to 64 grammy winners.</p>
+
+                <div class="form-group">
+                    <label>bracket seeding strategy</label>
+                    <select id="seed-strategy">
+                        <option value="historical">historical (newest vs oldest)</option>
+                        <option value="lastfm">personalized (last.fm streams)</option>
+                    </select>
+                </div>
+
+                <div id="lastfm-inputs" class="form-group">
+                    <label>last.fm username(s) [optional for tiebreakers]</label>
+                    <input type="text" id="usernames" placeholder="user1, user2">
+                    <label style="font-size: 11px; margin-top: 6px;">separate multiple usernames with a comma. if provided, will be used to resolve ties in historical, or as primary sort in personalized.</label>
+                </div>
+
+                <button id="generate-btn" class="btn-primary w-full" style="width: 100%;">generate bracket</button>
+                <div id="loading-msg" class="hidden" style="margin-top:10px; font-size:12px; color:var(--muted); text-align:center;">loading bracket, please wait...</div>
+            </div>
+        </main>
+
+        <main id="matchup-view" class="matchup-view hidden">
+            <div id="round-info" class="round-info">round 1 • match 1</div>
+
+            <div class="matchup-cards">
+                <div class="match-card" id="card-a">
+                    <span class="seed-badge" id="seed-a">seed #1</span>
+                    <h3 id="title-a">song title a</h3>
+                    <p id="artist-a">artist name</p>
+                    <button onclick="toggleInfo(0)" class="btn-info">info</button>
+                    <div id="info-panel-0" class="hidden info-panel"></div>
+
+                    <div class="embed-area hidden" id="embed-a"></div>
+                    <button style="width: 100%;" class="btn-primary" onclick="selectWinner(0)">vote</button>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: center;">
+                    <div class="vs-badge">vs</div>
+                </div>
+
+                <div class="match-card" id="card-b">
+                    <span class="seed-badge" id="seed-b">seed #64</span>
+                    <h3 id="title-b">song title b</h3>
+                    <p id="artist-b">artist name</p>
+                    <button onclick="toggleInfo(1)" class="btn-info">info</button>
+                    <div id="info-panel-1" class="hidden info-panel"></div>
+
+                    <div class="embed-area hidden" id="embed-b"></div>
+                    <button style="width: 100%;" class="btn-primary" onclick="selectWinner(1)">vote</button>
+                </div>
+            </div>
+            
+            <div id="winner-view" class="hidden" style="text-align: center;">
+                <h2>🏆 Champion! 🏆</h2>
+                <h3 id="champion-title" style="color:var(--accent); font-size: 32px; margin-top:10px;"></h3>
+                <p id="champion-artist"></p>
+                <button onclick="resetBracket()" class="btn-primary">Start New Bracket</button>
+            </div>
+        </main>
+
+        <aside id="sidebar" class="sidebar hidden">
+            <div class="sidebar-header">tournament tree</div>
+            <div class="sidebar-content" id="tree-container">
+            </div>
+        </aside>
+    </div>
+
+    <!-- Inject grammyData -->
+    <script type="module">
+        import { grammyData } from '../../grammyData.js';
+        
+        const LASTFM_API_KEY = 'f6a247234060014c604f9e1f8b85ff83';
+        
+        // 64-team seed ordering logic (1 plays 64, 2 plays 63, etc.)
+        const bracketSeedingOrder = [
+            1, 64, 32, 33, 16, 49, 17, 48,
+            8, 57, 25, 40, 9, 56, 24, 41,
+            4, 61, 29, 36, 13, 52, 20, 45,
+            5, 60, 28, 37, 12, 53, 21, 44,
+            2, 63, 31, 34, 15, 50, 18, 47,
+            7, 58, 26, 39, 10, 55, 23, 42,
+            3, 62, 30, 35, 14, 51, 19, 46,
+            6, 59, 27, 38, 11, 54, 22, 43
+        ];
+
+        let state = {
+            matches: [],
+            currentMatchIndex: 0,
+            round: 1,
+            history: [],
+            finished: false,
+            roundTotal: 32
+        };
+
+        const strategySelect = document.getElementById('seed-strategy');
+        const embedPref = document.getElementById('embed-pref');
+        
+        // Initialize from localStorage
+        const savedState = localStorage.getItem('GB_state');
+        const savedPref = localStorage.getItem('GB_embedPref');
+        
+        if (savedPref) {
+            embedPref.value = savedPref;
+        }
+
+        embedPref.addEventListener('change', (e) => {
+            localStorage.setItem('GB_embedPref', e.target.value);
+            renderCurrentMatch();
+        });
+
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            if(confirm("Are you sure you want to reset your bracket data?")) {
+                resetBracket();
+            }
+        });
+
+        if (savedState) {
+            state = JSON.parse(savedState);
+            if (!state.finished) {
+                document.getElementById('setup-view').classList.add('hidden');
+                document.getElementById('matchup-view').classList.remove('hidden');
+                document.getElementById('sidebar').classList.remove('hidden');
+                renderCurrentMatch();
+                renderTree();
+            }
+        }
+
+        document.getElementById('generate-btn').addEventListener('click', async () => {
+            document.getElementById('generate-btn').classList.add('hidden');
+            document.getElementById('loading-msg').classList.remove('hidden');
+            
+            try {
+                // Filter to just winners, limit to last 64 newest
+                let songs = grammyData.filter(s => s.isWinner).slice(0, 64);
+                
+                const strategy = strategySelect.value;
+                const usernames = document.getElementById('usernames').value.split(',').filter(u => u.trim());
+                
+                // Fetch scrobbles for everyone if usernames provided, so they can be used for tiebreakers 
+                if(usernames.length > 0) {
+                    songs = await fetchLastFmScrobbles(usernames, songs);
+                } else {
+                    songs.forEach(s => s.scrobbles = 0);
+                }
+
+                if (strategy === 'lastfm') {
+                    // Sort by scrobble count, tiebreak by year descending
+                    songs.sort((a,b) => {
+                        if (b.scrobbles !== a.scrobbles) return b.scrobbles - a.scrobbles;
+                        return b.year - a.year;
+                    });
+                } else {
+                    // Historical strategy: sort by year descending (newest first), tiebreaker by scrobbles
+                    songs.sort((a,b) => {
+                        if (b.year !== a.year) return b.year - a.year;
+                        return b.scrobbles - a.scrobbles;
+                    });
+                }
+
+                // Add original seed rank after sorting
+                songs.forEach((s, idx) => s.seed = idx + 1);
+
+                // Build initial 32 matchups for 64 teams
+                state.matches = [];
+                const paddedSongs = [...songs];
+                while(paddedSongs.length < 64) { paddedSongs.push(null); }
+                
+                for (let i = 0; i < bracketSeedingOrder.length; i += 2) {
+                    state.matches.push({
+                        teamA: paddedSongs[bracketSeedingOrder[i] - 1],
+                        teamB: paddedSongs[bracketSeedingOrder[i+1] - 1],
+                        winner: null
+                    });
+                }
+
+                state.currentMatchIndex = 0;
+                state.round = 1;
+                state.roundTotal = 32;
+                state.history = [];
+                state.finished = false;
+                
+                // Automatically handle bye weeks (null teams)
+                for (let i = 0; i < state.matches.length; i++) {
+                    const m = state.matches[i];
+                    if (!m.teamB && m.teamA) m.winner = m.teamA;
+                    else if (!m.teamA && m.teamB) m.winner = m.teamB;
+                }
+                
+                // Fast-forward past byes if current match is a bye
+                advanceToNextValidMatch();
+
+                localStorage.setItem('GB_state', JSON.stringify(state));
+                
+                document.getElementById('setup-view').classList.add('hidden');
+                document.getElementById('matchup-view').classList.remove('hidden');
+                document.getElementById('sidebar').classList.remove('hidden');
+
+                renderCurrentMatch();
+                renderTree();
+
+            } catch (e) {
+                console.error(e);
+                alert("Failed to generate bracket.");
+                document.getElementById('generate-btn').classList.remove('hidden');
+                document.getElementById('loading-msg').classList.add('hidden');
+            }
+        });
+
+        async function fetchLastFmScrobbles(users, songs) {
+            const scored = [...songs];
+            for (let song of scored) {
+                song.scrobbles = 0;
+                for (let user of users) {
+                    try {
+                        const url = `https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=${LASTFM_API_KEY}&artist=${encodeURIComponent(song.artist)}&track=${encodeURIComponent(song.title)}&username=${user.trim()}&format=json`;
+                        const res = await fetch(url);
+                        const data = await res.json();
+                        if (data.track && data.track.userplaycount) {
+                            song.scrobbles += parseInt(data.track.userplaycount);
+                        }
+                    } catch(e) {}
+                }
+            }
+            return scored;
+        }
+
+        window.selectWinner = function(winnerIdx) {
+            const m = state.matches[state.currentMatchIndex];
+            m.winner = winnerIdx === 0 ? m.teamA : m.teamB;
+            
+            // Re-render tree immediately to cross out loser
+            m.teamALost = winnerIdx === 1 ? true : false;
+            m.teamBLost = winnerIdx === 0 ? true : false;
+
+            advanceToNextValidMatch();
+        }
+        
+        function advanceToNextValidMatch() {
+            while (state.currentMatchIndex < state.matches.length && state.matches[state.currentMatchIndex].winner !== null) {
+                state.currentMatchIndex++;
+            }
+
+            if (state.currentMatchIndex >= state.matches.length) {
+                nextRound();
+            } else {
+                saveAndRender();
+            }
+        }
+
+        window.toggleInfo = async function(idx) {
+            const panel = document.getElementById(`info-panel-${idx}`);
+            if (!panel.classList.contains('hidden')) {
+                panel.classList.add('hidden');
+                return;
+            }
+
+            const m = state.matches[state.currentMatchIndex];
+            const track = idx === 0 ? m.teamA : m.teamB;
+            if (!track) return;
+            
+            panel.innerHTML = `<div style="text-align:center; padding: 10px;">Loading info...</div>`;
+            panel.classList.remove('hidden');
+
+            // Find other nominees for this year
+            const otherNominees = grammyData.filter(s => s.year === track.year && !s.isWinner && s.title);
+            
+            let html = `<div><strong>Year:</strong> ${track.year}</div>`;
+            if (track.writers) html += `<div style="margin-top:4px;"><strong>Writers:</strong> ${track.writers}</div>`;
+            if (track.coverUrl) html += `<div style="margin-top:8px;"><img src="${track.coverUrl}" style="max-width:100%; border-radius:4px" /></div>`;
+            
+            if (otherNominees.length > 0) {
+                html += `<div style="margin-top:8px;"><strong>Other Nominees (${track.year}):</strong><ul style="margin: 4px 0 0; padding-left: 16px;">`;
+                otherNominees.forEach(n => {
+                    html += `<li>${n.title} - ${n.artist}</li>`;
+                });
+                html += `</ul></div>`;
+            } else {
+                html += `<div style="margin-top:8px;"><em>No other nominees recorded for ${track.year}</em></div>`;
+            }
+
+            const inputUsernames = document.getElementById('usernames').value.split(',').filter(u => u.trim());
+            if (inputUsernames.length > 0) {
+                html += `<div style="margin-top:8px; border-top: 1px solid var(--border); padding-top: 8px;"><strong>Last.fm Streams:</strong>`;
+                panel.innerHTML = html + `<div style="margin-top:4px; font-size:11px;">Fetching scrobbles <span style="display:inline-block; animation: spin 1s linear infinite;">⏳</span></div>`;
+                
+                let combined = 0;
+                let userScores = [];
+                for (let i = 0; i < inputUsernames.length; i++) {
+                    const user = inputUsernames[i].trim();
+                    try {
+                        const url = `https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=${LASTFM_API_KEY}&artist=${encodeURIComponent(track.artist)}&track=${encodeURIComponent(track.title)}&username=${encodeURIComponent(user)}&format=json`;
+                        const res = await fetch(url);
+                        const data = await res.json();
+                        let count = 0;
+                        if (data.track && data.track.userplaycount) {
+                            count = parseInt(data.track.userplaycount);
+                        }
+                        userScores.push({ user, count });
+                        combined += count;
+                    } catch(e) {
+                        userScores.push({ user, count: 0 });
+                    }
+                    if (i < inputUsernames.length - 1) {
+                        await new Promise(r => setTimeout(r, 1000)); // wait 1 sec to prevent rate limiting
+                    }
+                }
+                
+                html += `<ul style="margin: 4px 0 0; padding-left: 16px;">`;
+                userScores.forEach(u => {
+                    html += `<li>${u.user}: ${u.count} streams</li>`;
+                });
+                if (userScores.length > 1) {
+                    html += `<li style="margin-top:4px;"><strong>Combined: ${combined} streams</strong></li>`;
+                }
+                html += `</ul></div>`;
+            }
+
+            panel.innerHTML = html;
+        }
+
+        function nextRound() {
+            // Build next round matches from the winners
+            const winners = state.matches.map(m => m.winner).filter(w => w);
+            state.history.push([...state.matches]);
+            state.matches = [];
+            
+            if (winners.length === 1) {
+                state.finished = true;
+                saveAndRender();
+                return;
+            }
+
+            for (let i = 0; i < winners.length; i += 2) {
+                state.matches.push({
+                    teamA: winners[i],
+                    teamB: winners[i+1] || null,
+                    winner: null
+                });
+            }
+            
+            // Auto advance byes
+            for (let i = 0; i < state.matches.length; i++) {
+                const m = state.matches[i];
+                if (!m.teamB && m.teamA) m.winner = m.teamA;
+                else if (!m.teamA && m.teamB) m.winner = m.teamB;
+            }
+
+            state.round++;
+            state.roundTotal = state.matches.length;
+            state.currentMatchIndex = 0;
+
+            if (state.matches.length > 0 && state.matches[state.currentMatchIndex].winner !== null) {
+                advanceToNextValidMatch();
+            } else {
+                saveAndRender();
+            }
+        }
+
+        function saveAndRender() {
+            localStorage.setItem('GB_state', JSON.stringify(state));
+            renderCurrentMatch();
+            renderTree();
+        }
+
+        window.resetBracket = function() {
+            localStorage.removeItem('GB_state');
+            location.reload();
+        }
+
+        function renderCurrentMatch() {
+            const matchupCards = document.querySelector('.matchup-cards');
+            const winnerView = document.getElementById('winner-view');
+            
+            if (state.finished) {
+                matchupCards.classList.add('hidden');
+                winnerView.classList.remove('hidden');
+                document.getElementById('sidebar').classList.add('hidden');
+                const lastHistory = state.history[state.history.length-1];
+                const champion = lastHistory[0].winner;
+                
+                document.getElementById('champion-title').innerText = champion.title;
+                document.getElementById('champion-artist').innerText = champion.artist;
+                document.getElementById('round-info').innerText = "tournament complete";
+                return;
+            }
+
+            const m = state.matches[state.currentMatchIndex];
+            if(!m) return;
+
+            document.getElementById('round-info').innerText = `round ${state.round} • match ${state.currentMatchIndex + 1} / ${state.roundTotal}`;
+
+            // Setup Card A
+            document.getElementById('seed-a').innerText = `seed #${m.teamA.seed}`;
+            document.getElementById('title-a').innerText = m.teamA.title;
+            document.getElementById('artist-a').innerText = m.teamA.artist;
+            document.getElementById('info-panel-0').classList.add('hidden');
+            setupEmbed('embed-a', m.teamA);
+
+            // Setup Card B
+            if (m.teamB) {
+                document.getElementById('card-b').style.visibility = 'visible';
+                document.getElementById('seed-b').innerText = `seed #${m.teamB.seed}`;
+                document.getElementById('title-b').innerText = m.teamB.title;
+                document.getElementById('artist-b').innerText = m.teamB.artist;
+                document.getElementById('info-panel-1').classList.add('hidden');
+                setupEmbed('embed-b', m.teamB);
+            } else {
+                document.getElementById('card-b').style.visibility = 'hidden';
+            }
+        }
+
+        function setupEmbed(elementId, track) {
+            const el = document.getElementById(elementId);
+            const pref = document.getElementById('embed-pref').value;
+            
+            if (pref === 'none') {
+                el.classList.add('hidden');
+                el.innerHTML = '';
+            } else if (pref === 'spotify' && track.spotifyId) {
+                el.classList.remove('hidden');
+                el.innerHTML = `<iframe src="https://open.spotify.com/embed/track/${track.spotifyId}" allow="encrypted-media"></iframe>`;
+            } else if (pref === 'youtube' && track.youtubeId) {
+                el.classList.remove('hidden');
+                el.innerHTML = `<iframe src="https://www.youtube.com/embed/${track.youtubeId}" allow="encrypted-media"></iframe>`;
+            } else {
+                el.classList.add('hidden');
+                el.innerHTML = '';
+            }
+        }
+
+        function renderTree() {
+            const container = document.getElementById('tree-container');
+            container.innerHTML = '';
+            
+            // Shows Current Round Matchups
+            state.matches.forEach((m, idx) => {
+                if(!m.teamA && !m.teamB) return;
+                
+                const clsA = m.teamALost ? 'tree-node loser' : (m.winner?.id === m.teamA?.id ? 'tree-node winner' : 'tree-node');
+                const htmlA = m.teamA ? `<div class="${clsA}">${m.teamA.seed}. ${m.teamA.title}</div>` : '';
+                
+                const clsB = m.teamBLost ? 'tree-node loser' : (m.winner?.id === m.teamB?.id ? 'tree-node winner' : 'tree-node');
+                const htmlB = m.teamB ? `<div class="${clsB}">${m.teamB.seed}. ${m.teamB.title}</div>` : '';
+                
+                container.innerHTML += `
+                    ${htmlA}
+                    ${htmlB}
+                    <div class="tree-line"></div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
