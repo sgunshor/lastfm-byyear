@@ -226,8 +226,10 @@
                 const strategy = strategySelect.value;
                 const usernames = document.getElementById('usernames').value.split(',').filter(u => u.trim());
                 
-                // Fetch scrobbles for everyone if usernames provided, so they can be used for tiebreakers 
-                if(usernames.length > 0) {
+                // We only need to bulk-fetch scrobbles if the user specifically chose 'lastfm' as the seeding strategy!
+                // If they chose historical, we don't need to delay the bracket generation for 64 API requests.
+                // The info button handles it dynamically for us instead!
+                if(usernames.length > 0 && strategy === 'lastfm') {
                     songs = await fetchLastFmScrobbles(usernames, songs);
                 } else {
                     songs.forEach(s => s.scrobbles = 0);
@@ -240,10 +242,10 @@
                         return b.year - a.year;
                     });
                 } else {
-                    // Historical strategy: sort by year descending (newest first), tiebreaker by scrobbles
+                    // Historical strategy: sort by year descending (newest first), tiebreaker by title
                     songs.sort((a,b) => {
                         if (b.year !== a.year) return b.year - a.year;
-                        return b.scrobbles - a.scrobbles;
+                        return a.title.localeCompare(b.title);
                     });
                 }
 
@@ -298,18 +300,22 @@
 
         async function fetchLastFmScrobbles(users, songs) {
             const scored = [...songs];
-            for (let song of scored) {
-                song.scrobbles = 0;
-                for (let user of users) {
-                    try {
-                        const url = `https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=${LASTFM_API_KEY}&artist=${encodeURIComponent(song.artist)}&track=${encodeURIComponent(song.title)}&username=${user.trim()}&format=json`;
-                        const res = await fetch(url);
-                        const data = await res.json();
-                        if (data.track && data.track.userplaycount) {
-                            song.scrobbles += parseInt(data.track.userplaycount);
-                        }
-                    } catch(e) {}
-                }
+            // Process in batches of 10 concurrent requests so we don't hit 429 rate limits, but it's still fast
+            for (let i = 0; i < scored.length; i += 10) {
+                const batch = scored.slice(i, i + 10);
+                await Promise.all(batch.map(async (song) => {
+                    song.scrobbles = 0;
+                    for (let user of users) {
+                        try {
+                            const url = `https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=${LASTFM_API_KEY}&artist=${encodeURIComponent(song.artist)}&track=${encodeURIComponent(song.title)}&username=${user.trim()}&format=json`;
+                            const res = await fetch(url);
+                            const data = await res.json();
+                            if (data.track && data.track.userplaycount) {
+                                song.scrobbles += parseInt(data.track.userplaycount);
+                            }
+                        } catch(e) {}
+                    }
+                }));
             }
             return scored;
         }
@@ -375,8 +381,10 @@
                 
                 let combined = 0;
                 let userScores = [];
-                for (let i = 0; i < inputUsernames.length; i++) {
-                    const user = inputUsernames[i].trim();
+                
+                // Fetch dynamically in parallel to instantly populate the panel
+                await Promise.all(inputUsernames.map(async (userStr) => {
+                    const user = userStr.trim();
                     try {
                         const url = `https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=${LASTFM_API_KEY}&artist=${encodeURIComponent(track.artist)}&track=${encodeURIComponent(track.title)}&username=${encodeURIComponent(user)}&format=json`;
                         const res = await fetch(url);
@@ -390,10 +398,7 @@
                     } catch(e) {
                         userScores.push({ user, count: 0 });
                     }
-                    if (i < inputUsernames.length - 1) {
-                        await new Promise(r => setTimeout(r, 1000)); // wait 1 sec to prevent rate limiting
-                    }
-                }
+                }));
                 
                 html += `<ul style="margin: 4px 0 0; padding-left: 16px;">`;
                 userScores.forEach(u => {
