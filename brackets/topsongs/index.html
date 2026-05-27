@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>last.fm top 64 | lokiimp</title>
+    <style>
+        :root { --bg: #0b0d0f; --muted: #9aa0a6; --accent: #8ab4f8; --border: #202124; --hover: #17191cd1; }
+        html, body { height: 100%; margin: 0; }
+        body { background: var(--bg); color: #fff; font-family: system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; overflow: hidden; }
+        
+        .nav { width: 100%; padding: 20px 24px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); box-sizing: border-box; align-items: center; }
+        a { color: var(--accent); text-decoration: none; text-transform: lowercase; }
+        a:hover { text-decoration: underline; }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
+
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+
+        .nav-controls { display: flex; gap: 12px; align-items: center; }
+        select, input, button { background: var(--bg); color: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-family: system-ui; outline: none; text-transform: lowercase; font-size: 13px; }
+        select:focus, input:focus { border-color: var(--muted); }
+        button { cursor: pointer; transition: background 0.2s; }
+        button:hover { background: var(--hover); }
+        .btn-primary { background: #fff; color: #000; font-weight: bold; border: none; padding: 10px 16px; margin-top: 12px; }
+        .btn-primary:hover { background: #ccc; }
+        .btn-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: none; }
+        .btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
+
+        .app-container { flex: 1; display: flex; width: 100%; overflow: hidden; }
+        
+        .setup-view { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+        .setup-card { background: var(--bg); border: 1px solid var(--border); padding: 32px; border-radius: 12px; max-width: 400px; width: 100%; text-align: left; }
+        h1 { font-size: 32px; margin: 0 0 8px; font-weight: 700; text-transform: lowercase; letter-spacing: -1px; }
+        p.desc { color: var(--muted); font-size: 14px; margin: 0 0 24px; text-transform: lowercase; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; text-transform: lowercase; }
+        select, input { width: 100%; box-sizing: border-box; }
+
+        .matchup-view { flex: 1; flex-direction: column; align-items: center; justify-content: center; padding: 24px; position: relative; display: flex; overflow-y: auto; }
+        .round-info { text-align: center; color: var(--muted); font-size: 12px; letter-spacing: 1px; text-transform: lowercase; margin-bottom: 32px; }
+        .matchup-cards { display: flex; width: 100%; max-width: 900px; gap: 24px; justify-content: space-between; align-items: stretch; }
+        .match-card { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 24px; cursor: pointer; transition: all 0.2s; position: relative; }
+        .match-card:hover { border-color: var(--muted); transform: translateY(-2px); }
+        .seed-badge { position: absolute; top: 16px; right: 16px; font-size: 11px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px; color: var(--muted); text-transform: lowercase; }
+        .match-card h3 { margin: 0 0 4px; font-size: 24px; text-transform: lowercase; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+        .match-card p { margin: 0 0 12px; color: var(--muted); text-transform: lowercase; font-size: 14px; }
+        .vs-badge { display: flex; align-items: center; justify-content: center; min-width: 48px; min-height: 48px; background: var(--bg); border: 1px solid var(--border); border-radius: 50%; color: var(--muted); font-weight: bold; font-size: 12px; text-transform: lowercase; }
+
+        .sidebar { width: 300px; border-left: 1px solid var(--border); display: flex; flex-direction: column; background: rgba(255,255,255,0.01); }
+        @media (max-width: 900px) { .sidebar { display: none !important; } .matchup-cards { flex-direction: column; } .vs-badge { margin: 0 auto; min-height: 32px; } }
+        .sidebar-header { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: bold; text-transform: lowercase; }
+        .sidebar-content { flex: 1; overflow-y: auto; padding: 20px; }
+        .tree-node { font-size: 12px; padding: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--muted); margin-bottom: 8px; text-transform: lowercase; transition: opacity 0.2s;}
+        .tree-node.loser { text-decoration: line-through; opacity: 0.3; }
+        .tree-node.winner { border-color: var(--accent); color: var(--accent);}
+        .tree-line { width: 1px; height: 16px; background: var(--border); margin-left: 16px; margin-bottom: 8px; }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .loading-spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid var(--muted); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 6px; vertical-align: -2px; }
+    </style>
+</head>
+<body>
+
+    <div class="nav">
+        <a href="/brackets/">← brackets</a>
+        <div class="nav-controls">
+            <button id="reset-btn" class="btn-danger">reset data</button>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <main id="setup-view" class="setup-view">
+            <div class="setup-card">
+                <h1>top 64 songs</h1>
+                <p class="desc">generate a tournament bracket of your top 64 tracks from last.fm.</p>
+
+                <div class="form-group">
+                    <label>time period</label>
+                    <select id="time-period">
+                        <option value="overall">overall</option>
+                        <option value="7day">last 7 days</option>
+                        <option value="1month">last month</option>
+                        <option value="3month">last 3 months</option>
+                        <option value="6month">last 6 months</option>
+                        <option value="12month">last year</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>last.fm username(s)</label>
+                    <input type="text" id="usernames" placeholder="user1, user2">
+                    <label style="font-size: 11px; margin-top: 6px;">separate multiple usernames with a comma to combine top tracks. (e.g. 1st plays 64th)</label>
+                </div>
+
+                <button id="generate-btn" class="btn-primary w-full" style="width: 100%;">generate bracket</button>
+                <div id="loading-msg" class="hidden" style="margin-top:10px; font-size:12px; color:var(--muted); text-align:center;">fetching top tracks from last.fm...</div>
+            </div>
+        </main>
+
+        <main id="matchup-view" class="matchup-view hidden">
+            <div id="round-info" class="round-info">round 1 • match 1</div>
+
+            <div class="matchup-cards">
+                <div class="match-card" id="card-a">
+                    <!-- <span class="seed-badge" id="seed-a">seed #1</span> -->
+                    <h3 id="title-a">song title a</h3>
+                    <p id="artist-a">artist name</p>
+                    <div id="streams-a" style="font-size: 11px; color: var(--muted); margin-bottom: 20px; line-height: 1.4;"></div>
+                    <button style="width: 100%;" class="btn-primary" onclick="selectWinner(0)">vote</button>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: center;">
+                    <div class="vs-badge">vs</div>
+                </div>
+
+                <div class="match-card" id="card-b">
+                    <!-- <span class="seed-badge" id="seed-b">seed #64</span> -->
+                    <h3 id="title-b">song title b</h3>
+                    <p id="artist-b">artist name</p>
+                    <div id="streams-b" style="font-size: 11px; color: var(--muted); margin-bottom: 20px; line-height: 1.4;"></div>
+                    <button style="width: 100%;" class="btn-primary" onclick="selectWinner(1)">vote</button>
+                </div>
+            </div>
+            
+            <div id="winner-view" class="hidden" style="text-align: center;">
+                <h2>🏆 Champion! 🏆</h2>
+                <h3 id="champion-title" style="color:var(--accent); font-size: 32px; margin-top:20px; text-transform: lowercase;"></h3>
+                <p id="champion-artist" style="text-transform: lowercase;"></p>
+                <button onclick="resetBracket()" class="btn-primary">Start New Bracket</button>
+            </div>
+        </main>
+
+        <aside id="sidebar" class="sidebar hidden">
+            <div class="sidebar-header">tournament tree</div>
+            <div class="sidebar-content" id="tree-container">
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        const LASTFM_API_KEY = 'f6a247234060014c604f9e1f8b85ff83';
+        
+        // 64-team seed ordering logic (1 plays 64, 2 plays 63, etc.)
+        const bracketSeedingOrder = [
+            1, 64, 32, 33, 16, 49, 17, 48,
+            8, 57, 25, 40, 9, 56, 24, 41,
+            4, 61, 29, 36, 13, 52, 20, 45,
+            5, 60, 28, 37, 12, 53, 21, 44,
+            2, 63, 31, 34, 15, 50, 18, 47,
+            7, 58, 26, 39, 10, 55, 23, 42,
+            3, 62, 30, 35, 14, 51, 19, 46,
+            6, 59, 27, 38, 11, 54, 22, 43
+        ];
+
+        let state = {
+            matches: [],
+            currentMatchIndex: 0,
+            round: 1,
+            history: [],
+            finished: false,
+            roundTotal: 32,
+            users: []
+        };
+
+        const timePeriodSelect = document.getElementById('time-period');
+        
+        // Initialize from localStorage
+        const savedState = localStorage.getItem('TS_state');
+        
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            if(confirm("Are you sure you want to reset your bracket data?")) {
+                resetBracket();
+            }
+        });
+
+        if (savedState) {
+            try {
+                state = JSON.parse(savedState);
+                if (!state.finished) {
+                    document.getElementById('setup-view').classList.add('hidden');
+                    document.getElementById('matchup-view').classList.remove('hidden');
+                    document.getElementById('sidebar').classList.remove('hidden');
+                    renderCurrentMatch();
+                    renderTree();
+                } else {
+                    document.getElementById('setup-view').classList.add('hidden');
+                    document.getElementById('matchup-view').classList.remove('hidden');
+                    document.querySelector('.matchup-cards').classList.add('hidden');
+                    document.getElementById('round-info').classList.add('hidden');
+                    document.getElementById('winner-view').classList.remove('hidden');
+                    renderWinner(state.matches[0].winner);
+                }
+            } catch(e) {}
+        }
+
+        async function fetchUserTopTracks(username, period, limit) {
+            const url = `https://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&user=${encodeURIComponent(username.trim())}&period=${period}&limit=${limit}&api_key=${LASTFM_API_KEY}&format=json`;
+            const res = await fetch(url);
+            const data = await res.json();
+            if (data.error) throw new Error(data.message);
+            return data.toptracks.track;
+        }
+
+        document.getElementById('generate-btn').addEventListener('click', async () => {
+            const usernames = document.getElementById('usernames').value.split(',').map(u => u.trim()).filter(u => u);
+            if (usernames.length === 0) {
+                alert("Please enter at least one Last.fm username.");
+                return;
+            }
+
+            document.getElementById('generate-btn').classList.add('hidden');
+            document.getElementById('loading-msg').classList.remove('hidden');
+            
+            try {
+                const period = timePeriodSelect.value;
+                const N = usernames.length;
+                const baseLimit = Math.floor(64 / N);
+                let remainder = 64 % N;
+
+                let allTracks = [];
+                for (let i = 0; i < N; i++) {
+                    const limit = baseLimit + (i < remainder ? 1 : 0);
+                    const tracks = await fetchUserTopTracks(usernames[i], period, limit);
+                    
+                    tracks.forEach(t => {
+                        allTracks.push({
+                            title: t.name,
+                            artist: t.artist.name,
+                            scrobbles: t.playcount, // good to have just in case
+                            owner: usernames[i]
+                        });
+                    });
+                }
+
+                // If they didn't even have 64 total across all users...
+                if (allTracks.length === 0) {
+                    throw new Error("No tracks found.");
+                }
+
+                // Seed sequentially (1..64)
+                allTracks.forEach((s, idx) => s.seed = idx + 1);
+
+                // Build initial 32 matchups for 64 teams
+                state.matches = [];
+                const paddedSongs = [...allTracks];
+                while(paddedSongs.length < 64) { paddedSongs.push(null); }
+                
+                for (let i = 0; i < bracketSeedingOrder.length; i += 2) {
+                    state.matches.push({
+                        teamA: paddedSongs[bracketSeedingOrder[i] - 1],
+                        teamB: paddedSongs[bracketSeedingOrder[i+1] - 1],
+                        winner: null
+                    });
+                }
+
+                state.currentMatchIndex = 0;
+                state.round = 1;
+                state.roundTotal = 32;
+                state.history = [];
+                state.finished = false;
+                state.users = usernames;
+                
+                // Automatically handle byes (null teams)
+                for (let i = 0; i < state.matches.length; i++) {
+                    const m = state.matches[i];
+                    if (!m.teamB && m.teamA) m.winner = m.teamA;
+                    else if (!m.teamA && m.teamB) m.winner = m.teamB;
+                }
+                
+                advanceToNextValidMatch();
+
+                localStorage.setItem('TS_state', JSON.stringify(state));
+                
+                document.getElementById('setup-view').classList.add('hidden');
+                document.getElementById('matchup-view').classList.remove('hidden');
+                document.getElementById('sidebar').classList.remove('hidden');
+
+                renderCurrentMatch();
+                renderTree();
+
+            } catch (e) {
+                console.error(e);
+                alert("Failed to generate bracket: " + e.message);
+                document.getElementById('generate-btn').classList.remove('hidden');
+                document.getElementById('loading-msg').classList.add('hidden');
+            }
+        });
+
+        window.selectWinner = function(winnerIdx) {
+            const m = state.matches[state.currentMatchIndex];
+            m.winner = winnerIdx === 0 ? m.teamA : m.teamB;
+
+            state.history.push({
+                matchIndex: state.currentMatchIndex,
+                round: state.round,
+                matchesState: JSON.parse(JSON.stringify(state.matches))
+            });
+
+            state.currentMatchIndex++;
+            advanceToNextValidMatch();
+
+            localStorage.setItem('TS_state', JSON.stringify(state));
+            renderCurrentMatch();
+            renderTree();
+        }
+
+        function advanceToNextValidMatch() {
+            while (state.currentMatchIndex >= state.matches.length) {
+                const nextRoundMatches = [];
+                for (let i = 0; i < state.matches.length; i += 2) {
+                    const a = state.matches[i].winner;
+                    const b = state.matches[i+1] ? state.matches[i+1].winner : null;
+                    nextRoundMatches.push({ teamA: a, teamB: b, winner: null });
+                }
+
+                if (nextRoundMatches.length === 1 && nextRoundMatches[0].teamB === null) {
+                    state.finished = true;
+                    state.matches = nextRoundMatches;
+                    nextRoundMatches[0].winner = nextRoundMatches[0].teamA;
+                    break;
+                }
+
+                state.matches = nextRoundMatches;
+                state.currentMatchIndex = 0;
+                state.round++;
+                state.roundTotal = state.matches.length;
+
+                for (let i = 0; i < state.matches.length; i++) {
+                    const m = state.matches[i];
+                    if (!m.teamB && m.teamA) m.winner = m.teamA;
+                    else if (!m.teamA && m.teamB) m.winner = m.teamB;
+                }
+            }
+
+            if (!state.finished) {
+                while (state.currentMatchIndex < state.matches.length && state.matches[state.currentMatchIndex].winner !== null) {
+                    state.currentMatchIndex++;
+                    if (state.currentMatchIndex >= state.matches.length) {
+                        advanceToNextValidMatch();
+                        break;
+                    }
+                }
+            }
+        }
+
+        function resetBracket() {
+            localStorage.removeItem('TS_state');
+            location.reload();
+        }
+
+        function renderCurrentMatch() {
+            if (state.finished) {
+                document.querySelector('.matchup-cards').classList.add('hidden');
+                document.getElementById('round-info').classList.add('hidden');
+                document.getElementById('winner-view').classList.remove('hidden');
+                renderWinner(state.matches[0].winner);
+                return;
+            }
+
+            const rLabel = state.roundTotal === 1 ? "Championship" :
+                           state.roundTotal === 2 ? "Final Four" :
+                           state.roundTotal === 4 ? "Elite Eight" :
+                           state.roundTotal === 8 ? "Sweet Sixteen" : 
+                           `Round of ${state.roundTotal * 2}`;
+                           
+            document.getElementById('round-info').innerText = `${rLabel} • Match ${state.currentMatchIndex + 1} of ${state.roundTotal}`;
+
+            const m = state.matches[state.currentMatchIndex];
+
+            document.getElementById('title-a').innerText = m.teamA.title;
+            document.getElementById('artist-a').innerText = m.teamA.artist + (m.teamA.owner ? ` (${m.teamA.owner})` : '');
+            // document.getElementById('seed-a').innerText = `seed #${m.teamA.seed}`;
+
+            document.getElementById('title-b').innerText = m.teamB.title;
+            document.getElementById('artist-b').innerText = m.teamB.artist + (m.teamB.owner ? ` (${m.teamB.owner})` : '');
+            // document.getElementById('seed-b').innerText = `seed #${m.teamB.seed}`;
+
+            loadMatchStreams(m.teamA, m.teamB);
+        }
+
+        async function loadMatchStreams(teamA, teamB) {
+            const streamsA = document.getElementById('streams-a');
+            const streamsB = document.getElementById('streams-b');
+            
+            streamsA.innerHTML = '<span class="loading-spinner"></span> loading streams...';
+            streamsB.innerHTML = '<span class="loading-spinner"></span> loading streams...';
+            
+            try {
+                const users = state.users || [];
+                if (users.length === 0) {
+                    streamsA.innerHTML = '';
+                    streamsB.innerHTML = '';
+                    return;
+                }
+
+                let htmlA = '', htmlB = '';
+                for (let user of users) {
+                    // Fetch for Team A
+                    let countA = 0;
+                    try {
+                        const urlA = `https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=${LASTFM_API_KEY}&artist=${encodeURIComponent(teamA.artist)}&track=${encodeURIComponent(teamA.title)}&username=${encodeURIComponent(user)}&format=json`;
+                        const resA = await fetch(urlA);
+                        const dataA = await resA.json();
+                        if (dataA.track && dataA.track.userplaycount) countA = dataA.track.userplaycount;
+                    } catch(e) {}
+                    
+                    // Fetch for Team B
+                    let countB = 0;
+                    try {
+                        const urlB = `https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=${LASTFM_API_KEY}&artist=${encodeURIComponent(teamB.artist)}&track=${encodeURIComponent(teamB.title)}&username=${encodeURIComponent(user)}&format=json`;
+                        const resB = await fetch(urlB);
+                        const dataB = await resB.json();
+                        if (dataB.track && dataB.track.userplaycount) countB = dataB.track.userplaycount;
+                    } catch(e) {}
+
+                    htmlA += `<div>${user}: ${countA} plays</div>`;
+                    htmlB += `<div>${user}: ${countB} plays</div>`;
+                }
+
+                streamsA.innerHTML = htmlA;
+                streamsB.innerHTML = htmlB;
+            } catch (error) {
+                streamsA.innerHTML = 'could not load streams';
+                streamsB.innerHTML = 'could not load streams';
+            }
+        }
+
+        function renderWinner(winner) {
+            if (!winner) return;
+            document.getElementById('champion-title').innerText = winner.title;
+            document.getElementById('champion-artist').innerText = winner.artist;
+        }
+
+        function renderTree() {
+            const tc = document.getElementById('tree-container');
+            tc.innerHTML = '';
+            
+            // Build tree view based on matches structure
+            state.matches.forEach(m => {
+                const isA = m.teamA && m.winner && m.winner.seed === m.teamA.seed;
+                const isB = m.teamB && m.winner && m.winner.seed === m.teamB.seed;
+                
+                const nodeA = document.createElement('div');
+                nodeA.className = 'tree-node' + (m.winner ? (isA ? ' winner' : ' loser') : '');
+                nodeA.innerText = m.teamA ? `${m.teamA.seed}. ${m.teamA.title}` : 'bye';
+                tc.appendChild(nodeA);
+
+                const nodeB = document.createElement('div');
+                nodeB.className = 'tree-node' + (m.winner ? (isB ? ' winner' : ' loser') : '');
+                nodeB.innerText = m.teamB ? `${m.teamB.seed}. ${m.teamB.title}` : 'bye';
+                tc.appendChild(nodeB);
+
+                const line = document.createElement('div');
+                line.className = 'tree-line';
+                tc.appendChild(line);
+            });
+        }
+    </script>
+</body>
+</html>
